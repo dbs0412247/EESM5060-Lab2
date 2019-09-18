@@ -1,16 +1,24 @@
 package ece.course.eesm5060_lab2;
 
+import android.annotation.SuppressLint;
 import android.graphics.Color;
+import android.os.Handler;
+import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.support.v7.widget.Toolbar;
+import android.widget.TextView;
 
 public class MainActivity extends AppCompatActivity {
-    private DisplayView mDisplayView;
 
+    private final static float MAX_GRAVITY = 9.82f;
+    private DisplayView mDisplayView;
+    private AccelerometerSensor mAccSensor;
+
+    @SuppressLint("HandlerLeak")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -18,7 +26,34 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         mDisplayView = findViewById(R.id.mDisplayView);
+        mAccSensor = new AccelerometerSensor(this, new Handler(){
+            public void handleMessage(Message msg) {
+                float tmpX = msg.getData().getFloat(AccelerometerSensor.TAG_VALUE_DX);
+                float tmpY = -msg.getData().getFloat(AccelerometerSensor.TAG_VALUE_DY);
+                float tmpZ = msg.getData().getFloat(AccelerometerSensor.TAG_VALUE_DZ);
+                TextView tvValueX = (TextView) findViewById(R.id.acc_x);
+                TextView tvValueY = (TextView) findViewById(R.id.acc_y);
+                TextView tvValueZ = (TextView) findViewById(R.id.acc_z);
+                tvValueX.setText("X: " + tmpX);
+                tvValueY.setText("Y: " + tmpY);
+                tvValueZ.setText("Z: " + tmpZ);
+                mDisplayView.setPtr(tmpX / MAX_GRAVITY, tmpY / MAX_GRAVITY);
+            }
+        });
     }
+
+    public synchronized void onResume() {
+        super.onResume();
+        if (mAccSensor != null)
+            mAccSensor.startListening();
+    }
+
+    public synchronized void onPause() {
+        if (mAccSensor != null)
+            mAccSensor.stopListening();
+        super.onPause();
+    }
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
