@@ -15,7 +15,6 @@
         app:title="EESM Lab 2 (hcayuen)"
         android:layout_width="0dp"
         android:layout_height="?attr/actionBarSize"
-
         android:background="?attr/colorPrimary"
         android:elevation="4dp"
         android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
@@ -24,9 +23,6 @@
     <LinearLayout
         android:id="@+id/main_area"
         android:orientation="vertical"
-        android:layout_marginTop="16dp"
-        android:layout_marginLeft="16dp"
-        android:layout_marginRight="16dp"
         android:layout_width="0dp"
         android:layout_height="0dp"
         app:layout_constraintTop_toBottomOf="@+id/toolbar"
@@ -34,22 +30,32 @@
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent">
 
-        <TextView
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/acc_x"
-            android:text="X: N/A"/>
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/acc_y"
-            android:text="Y: N/A"/>
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/acc_z"
-            android:text="Z: N/A"/>
+            android:layout_margin="16dp"
+            android:orientation="vertical">
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/acc_x"
+                android:text="X: N/A"/>
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/acc_y"
+                android:text="Y: N/A"/>
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/acc_z"
+                android:text="Z: N/A"/>
+        </LinearLayout>
 
+        <ece.course.eesm5060_lab2.DisplayView
+            android:id="@+id/mDisplayView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"/>
     </LinearLayout>
 
 

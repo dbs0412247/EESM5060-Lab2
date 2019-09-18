@@ -6,29 +6,51 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.RectF;
+import android.util.AttributeSet;
 import android.view.SurfaceView;
 
 public class DisplayView extends SurfaceView {
 
-    private float mCenterX = 0;
-    private float mCenterY = 0;
-    private float mRadius = 0;
-    private Paint mPaintBlack = new Paint();
-    private Paint mPaintLtGray = new Paint();
-    private Paint mPaintRed = new Paint();
-    private Paint mPaintGreen = new Paint();
-    private Paint mPaintBlue = new Paint();
-    private Paint mPaintWhite = new Paint();
+    public final static int TYPE_BALL = 0;
+    public final static int TYPE_SQUARE = 1;
+    public final static int TYPE_DIAMOND = 2;
+    public final static int TYPE_ARC = 3;
 
-    public DisplayView(Context context) {
-        super(context);
-        mPaintBlack.setColor(Color.BLACK);
-        mPaintLtGray.setColor(Color.LTGRAY);
-        mPaintRed.setColor(Color.RED);
-        mPaintBlue.setColor(Color.BLUE);
-        mPaintGreen.setColor(Color.GREEN);
-        mPaintWhite.setColor(Color.WHITE);
+    private float mCenterX = 0f;
+    private float mCenterY = 0f;
+    private float mRadius = 0f;
+
+    private float mPtrCenterX = 100f;
+    private float mPtrCenterY = 100f;
+    private float mPtrRadius = 10f;
+
+    private int mPtrType = TYPE_BALL;
+    private int mPtrColor = Color.RED;
+
+    private Paint mDrawPaint = new Paint();
+    private RectF mArcRectF = new RectF();
+    private Path mDiamondPath = new Path();
+
+    public DisplayView(Context context, AttributeSet attrs) {
+        super(context, attrs);
         setWillNotDraw(false);
+    }
+
+    public void setPtr(float posX, float posY)
+    {
+        mPtrCenterX = posX * mRadius * 0.9f + mCenterX;
+        mPtrCenterY = posY * mRadius * 0.9f + mCenterY;
+        invalidate();
+    }
+
+    public void setPtrColor(int color) {
+        mPtrColor = color;
+        invalidate();
+    }
+
+    public void setPtrType(int type) {
+        mPtrType = type;
+        invalidate();
     }
 
     public void onDraw(Canvas canvas) {
@@ -36,25 +58,52 @@ public class DisplayView extends SurfaceView {
             return;
 
         canvas.drawColor(Color.BLACK);
-        canvas.drawCircle(mCenterX, mCenterY, mRadius, mPaintBlack);
-        canvas.drawCircle(40f, 40f, 10f, mPaintRed);
-        canvas.drawRect(70f, 30f, 90f, 50f, mPaintGreen);
-        Path path = new Path();
-        path.moveTo(40f, 70f);
-        path.moveTo(30f, 80f);
-        path.moveTo(40f, 90f);
-        path.moveTo(50f, 80f);
-        path.close();
-        canvas.drawPath(path, mPaintGreen);
-        canvas.drawArc(
-            new RectF(70f, 70f, 90f, 90f),
-            -45f, -90f, true, mPaintWhite);
+        mDrawPaint.setColor(Color.LTGRAY);
+        canvas.drawCircle(mCenterX, mCenterY, mRadius, mDrawPaint);
+
+        mDrawPaint.setColor(mPtrColor);
+        switch (mPtrType) {
+            case TYPE_BALL:
+                canvas.drawCircle(mPtrCenterX, mPtrCenterY, mPtrRadius, mDrawPaint);
+                break;
+            case TYPE_SQUARE:
+                canvas.drawRect(
+                    mPtrCenterX- mPtrRadius,
+                    mPtrCenterY - mPtrRadius,
+                    mPtrCenterX + mPtrRadius,
+                    mPtrCenterY + mPtrRadius, mDrawPaint);
+                break;
+            case TYPE_DIAMOND:
+                mDiamondPath.reset();
+                mDiamondPath.moveTo(mPtrCenterX, mPtrCenterY - mPtrRadius);
+                mDiamondPath.lineTo(mPtrCenterX - mPtrRadius, mPtrCenterY);
+                mDiamondPath.lineTo(mPtrCenterX, mPtrCenterY + mPtrRadius);
+                mDiamondPath.lineTo(mPtrCenterX + mPtrRadius, mPtrCenterY);
+                mDiamondPath.close();
+                canvas.drawPath(mDiamondPath, mDrawPaint);
+                break;
+            case TYPE_ARC:
+                mArcRectF.set(
+                        mPtrCenterX - mPtrRadius,
+                        mPtrCenterY - mPtrRadius,
+                        mPtrCenterX + mPtrRadius,
+                        mPtrCenterY + mPtrRadius);
+                canvas.drawArc(
+                    mArcRectF,
+                    -45f, -90f, true, mDrawPaint);
+                break;
+        }
     }
 
     public void onSizeChanged(int newW, int newH, int oldW, int oldH) {
         mCenterX = newW / 2.0f;
         mCenterY = newH / 2.0f;
         mRadius = ((newW < newH)? newW : newH) * 3.0f / 8.0f;
+
+        mPtrCenterX = mCenterX;
+        mPtrCenterY = mCenterY;
+        mPtrRadius = mRadius / 10f;
+
         invalidate();
     }
 }
